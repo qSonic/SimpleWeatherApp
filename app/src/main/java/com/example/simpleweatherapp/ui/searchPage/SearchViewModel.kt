@@ -1,45 +1,38 @@
 package com.example.simpleweatherapp.ui.searchPage
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationManager
-import android.provider.Settings
-import android.util.Log
-import androidx.core.app.ActivityCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.simpleweatherapp.ui.MainActivity
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import androidx.lifecycle.viewModelScope
+import com.example.simpleweatherapp.data.model.Weather
+import com.example.simpleweatherapp.data.repository.WeatherRepository
+import com.example.simpleweatherapp.util.Resource
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class SearchViewModel : ViewModel() {
+@HiltViewModel
+class SearchViewModel @Inject constructor(
+    private val weatherRepository: WeatherRepository
+) : ViewModel() {
 
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    val currentLocation: MutableLiveData<Location> = MutableLiveData()
+    val citiesList: MutableLiveData<ArrayList<Weather>> = MutableLiveData()
+    val citiesResponse: MutableLiveData<Resource<Weather>> = MutableLiveData()
 
-    fun getLocation(activity: Activity) {
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(activity)
-        if (ActivityCompat.checkSelfPermission(
-                activity,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    activity,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-                ) != PackageManager.PERMISSION_GRANTED
-        ) {
-            Log.d("permission", "not granted")
-            ActivityCompat.requestPermissions(activity, arrayOf(Manifest.permission.ACCESS_FINE_LOCATION), 1 )
+    fun getWeather(lat: Double, lon: Double) = viewModelScope.launch {
+
+        citiesResponse.postValue(Resource.loading())
+        val response = weatherRepository.getWeatherByLocation(lat, lon)
+
+        if (response.status == Resource.Status.SUCCESS){
+            citiesResponse.postValue(Resource.success(response.data!!))
+        } else {
+            citiesResponse.postValue(Resource.error(response.message))
         }
-        fusedLocationClient.lastLocation
-            .addOnSuccessListener { location: Location? ->
-                if (location != null) {
-                    Log.d("location", location.toString())
-                    currentLocation.postValue(location)
-                }
-            }
     }
+
+
+
+
 }
