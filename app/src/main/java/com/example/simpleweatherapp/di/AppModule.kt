@@ -1,14 +1,15 @@
 package com.example.simpleweatherapp.di
 
+import android.content.Context
 import com.example.simpleweatherapp.data.api.WeatherService
+import com.example.simpleweatherapp.data.db.AppDatabase
 import com.example.simpleweatherapp.util.Constants.BASE_URL
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -42,5 +43,15 @@ object AppModule {
     fun provideGson(): Gson = GsonBuilder().create()
 
     @Provides
-    fun provideWeatherService(retrofit: Retrofit): WeatherService = retrofit.create(WeatherService::class.java)
+    fun provideWeatherService(retrofit: Retrofit): WeatherService =
+        retrofit.create(WeatherService::class.java)
+
+    @Singleton
+    @Provides
+    fun provideDatabase(@ApplicationContext appContext: Context) =
+        AppDatabase.getDatabase(appContext)
+
+    @Singleton
+    @Provides
+    fun provideWeatherDao(db: AppDatabase) = db.weatherDao()
 }

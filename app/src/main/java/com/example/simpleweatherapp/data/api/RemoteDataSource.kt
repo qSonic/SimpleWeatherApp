@@ -1,13 +1,14 @@
 package com.example.simpleweatherapp.data.api
 
-import com.example.simpleweatherapp.data.BaseSource
 import javax.inject.Inject
 
-class RemoteSource @Inject constructor(
+class RemoteDataSource @Inject constructor(
     private val weatherService: WeatherService
-) : BaseSource() {
+) : BaseDataSource() {
 
     suspend fun getWeatherByLocation(lat: Double, lon: Double) =
         getResult { weatherService.getWeatherByLocation(lat, lon) }
 
+    suspend fun getWeatherByCity(cityName: String) =
+        getResult { weatherService.getWeatherByCity(cityName) }
 }

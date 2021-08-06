@@ -1,10 +1,10 @@
-package com.example.simpleweatherapp.data
+package com.example.simpleweatherapp.data.api
 
 import android.util.Log
 import com.example.simpleweatherapp.util.Resource
 import retrofit2.Response
 
-abstract class BaseSource {
+abstract class BaseDataSource {
 
     protected suspend fun <T> getResult(call: suspend () -> Response<T>): Resource<T> {
         try {
